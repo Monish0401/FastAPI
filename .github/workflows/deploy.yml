@@ -1,0 +1,52 @@
+name: Deploy FastAPI App
+
+on:
+  push:
+    branches:
+      - main  # This will trigger the workflow on pushes to the main branch
+    paths:
+      - 'main.py'  # Only run on changes to Python files (optional)
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  # You can also specify your own runner if needed
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.11.9'  # Specify the Python version you're using
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt  # Make sure to have a requirements.txt file
+
+      - name: Run tests
+        run: |
+          # Run tests if you have them
+          pip show fastapi sqlalchemy aiomysql cryptography  # or your preferred test framework, remove if not needed
+
+      # - name: Deploy to server
+      #   env:
+      #     SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  # Store private key securely in GitHub Secrets
+      #     SERVER_USER: ${{ secrets.SERVER_USER }}
+      #     SERVER_HOST: ${{ secrets.SERVER_HOST }}
+      #     SERVER_PATH: ${{ secrets.SERVER_PATH }}
+      #   run: |
+      #     # Set up SSH key for authentication
+      #     echo "$SSH_PRIVATE_KEY" > private_key.pem
+      #     chmod 600 private_key.pem
+          
+      #     # SSH into your server and deploy the app
+      #     ssh -i private_key.pem -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << EOF
+      #       cd $SERVER_PATH || exit
+      #       git pull origin main || exit  # Pull the latest code from the repository
+      #       pip install -r requirements.txt || exit  # Install dependencies
+      #       sudo systemctl restart your_fastapi_app.service || exit  # Restart your FastAPI service
+      #     EOF
+          
+      #     # Clean up the private key after deployment
+      #     rm private_key.pem
